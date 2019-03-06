@@ -18,6 +18,7 @@ class Cluster:
         # col index = attribute index
         self.centers = np.random.randint(0,MAX+1,size=(K,num_attr))
         self.classes = np.zeros(K)
+        self.nonzero = []
 
         self.amse = 0     # average mean square error
         self.mss  = 0     # mean square separation
@@ -73,15 +74,22 @@ class Cluster:
 
         # Classify the clusters
         # The most frequent class in the cluster is the class of the cluster
-        print("Classifying clusters")
+        self.nonzero = []
+
         for i in range(len(self.centers)):
             index = np.asarray(np.where(cindex==i))
             index = index.reshape(-1)
 
-            u, indices = np.unique(label[index], return_inverse=True)
-            self.classes[i] = u[np.argmax(np.bincount(indices))]
+            if index.size == 0:
+                self.classes[i] = -1 # empty cluster
+            else:
+                self.nonzero.append(i)
+                u, indices = np.unique(label[index], return_inverse=True)
+                self.classes[i] = u[np.argmax(np.bincount(indices))]
 
+    def calc_mss(self):
         
+
 
 
             
