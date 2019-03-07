@@ -52,7 +52,7 @@ class Cluster:
     def fit(self, data, label):
         new_center  = self.centers.copy()
         prev_center = np.zeros(self.centers.shape)
-        count = 0
+        count       = 0  # provide counter to watch how many times center changes
 
         while(not np.array_equiv(prev_center,new_center)):
             print("changing centers {}".format(count))
@@ -75,7 +75,7 @@ class Cluster:
             if(np.array_equiv(prev_center,new_center)):
                 print("Centers are the same")
 
-        self.centers = new_center
+        self.centers = new_center.copy()
 
         # Classify the clusters
         # The most frequent class in the cluster is the class of the cluster
@@ -85,16 +85,16 @@ class Cluster:
             index = np.asarray(np.where(cindex==i))
             index = index.reshape(-1)
 
-            if index.size == 0:
-                self.classes[i] = -1 # empty cluster
-                self.mse[i]     = -1
+            if index.size == 0: # empty clusters
+                self.classes[i] = -1
+                self.mse[i]     =  0
             else:
                 u, indices = np.unique(label[index], return_inverse=True)
                 self.classes[i] = u[np.argmax(np.bincount(indices))]
                 self.nonzero.append(i)
                 self.calc_mse(data[index],i)
         
-        self.amse = np.sum(self.mse)/((len(self.centers)*(len(self.centers)-1)/2))
+        self.amse = np.sum(self.mse[self.nonzero])/((len(self.nonzero)*(len(self.nonzero)-1)/2))
         self.calc_mss(self.nonzero)
 
     # Calculate the mean square error of one center
@@ -117,4 +117,5 @@ class Cluster:
         self.mss = dsum/len(index)
 
     # Calculate mean entropy
-    #def mean_entropy(self,index):
+  #  def entropy(self, data):
+
