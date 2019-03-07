@@ -94,6 +94,7 @@ class Cluster:
                 self.classes[i] = u[np.argmax(np.bincount(indices))]
                 self.nonzero.append(i)
                 self.calc_mse(data[index],i)
+                self.entropy(label[index])
         
         self.amse = np.sum(self.mse[self.nonzero])/((len(self.nonzero)*(len(self.nonzero)-1)/2))
         self.calc_mss(self.nonzero)
@@ -118,5 +119,13 @@ class Cluster:
         self.mss = dsum/len(index)
 
     # Calculate mean entropy
-  #  def entropy(self, data):
+    def entropy(self, label):
+        u, indices = np.unique(label,return_inverse=True)
+        count = np.bincount(indices)
+        total = 0
 
+        for i in count:
+            p = count/len(label)
+            total += p*np.log2(p)
+        
+        return -1*total
