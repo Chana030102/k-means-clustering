@@ -48,7 +48,8 @@ class Cluster:
             return distance
 
     # Fit cluster centers to training data
-    # Done calculating when centers don't move  
+    # Iterate until clusters don't move
+    # Calculate AMSE, MSS, and mean entropy when done iterating 
     def fit(self, data, label):
         new_center  = self.centers.copy()
         prev_center = np.zeros(self.centers.shape)
@@ -106,7 +107,7 @@ class Cluster:
         self.mse[cindex] = np.sum(d)/len(data)
         
     # Calculate mean square separation
-    # Provide list of index for nonempty clusters
+    # Provide list of indices for nonempty clusters
     # (sum of distance of distinct pairs of centroids)/(K(K-1)/2)
     def calc_mss(self,index):
         dsum = 0
