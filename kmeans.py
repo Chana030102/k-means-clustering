@@ -150,4 +150,3 @@ class Cluster:
                     prediction[index] = self.classes[i]
         
         return prediction
-
