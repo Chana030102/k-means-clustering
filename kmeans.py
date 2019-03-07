@@ -23,7 +23,8 @@ class Cluster:
         self.amse = 0            # average mean square error
         self.mse  = np.zeros(K)  # mean square error
         self.mss  = 0            # mean square separation
-        self.me   = np.zeros(K)  # mean entropy
+        self.e    = np.zeros(K)  # entropy
+        self.me   = 0  # mean entropy
 
     # Calculate distance between data and cluster centers
     # return_raw:
@@ -94,7 +95,8 @@ class Cluster:
                 self.classes[i] = u[np.argmax(np.bincount(indices))]
                 self.nonzero.append(i)
                 self.calc_mse(data[index],i)
-                self.entropy(label[index])
+                self.e[i] = self.entropy(label[index])
+                self.me += (len(index)/len(label))*self.e[i]
         
         self.amse = np.sum(self.mse[self.nonzero])/((len(self.nonzero)*(len(self.nonzero)-1)/2))
         self.calc_mss(self.nonzero)
