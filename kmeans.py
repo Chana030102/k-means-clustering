@@ -58,7 +58,6 @@ class Cluster:
         count       = 0  # provide counter to watch how many times center changes
 
         while(not np.array_equiv(prev_center,new_center)):
-            print("changing centers {}".format(count))
             prev_center = new_center.copy()
             cindex = self.cluster_group(prev_center, data)
 
@@ -73,11 +72,12 @@ class Cluster:
                     cdata = data[index]
                     cdata = np.sum(cdata,axis=0)/len(index)
                     new_center[i] = cdata
-
-            count += 1
+            
             if(np.array_equiv(prev_center,new_center)):
-                print("Centers are the same")
-
+                print("Centers don't move after {} iterations".format(count))
+            else:
+                count += 1
+        # save new centroids
         self.centers = new_center.copy()
 
         # Classify the clusters
@@ -145,8 +145,8 @@ class Cluster:
                 # If this cluster is empty, use the most frequent class as prediction
                 if self.classes[i] == -1:
                     u, indices = np.unique(testl[index], return_inverse=True)
-                    prediction[index] = u[np.argmax(np.bincount(indices))]
-                else:
-                    prediction[index] = self.classes[i]
+                    self.classes[i] = u[np.argmax(np.bincount(indices))]
+
+                prediction[index] = self.classes[i]
         
         return prediction
