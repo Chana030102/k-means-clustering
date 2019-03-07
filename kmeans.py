@@ -24,9 +24,10 @@ class Cluster:
         self.mse  = np.zeros(K)  # mean square error
         self.mss  = 0            # mean square separation
         self.e    = np.zeros(K)  # entropy
-        self.me   = 0  # mean entropy
+        self.me   = 0            # mean entropy
 
     # Calculate distance between data and cluster centers
+    # Determines which cluster each data instance belongs to
     # return_raw:
     #   False --> return index of centers that each instance belongs to
     #   True  --> return distances between each instance and each center
@@ -125,3 +126,27 @@ class Cluster:
         _, indices = np.unique(label,return_inverse=True)
         count = np.bincount(indices)
         return np.sum(count*np.log2(count))
+
+    # Classify the provided test data
+    def classify(self, testd, testl):
+        # to store predicted class
+        prediction = np.full(testl.shape,-1)
+
+        # Identify which cluster each instance goes under
+        cindex = self.cluster_group(self.centers, testd)
+        
+        # Get predicted class for each data instance
+        for i in range(len(self.centers)):
+            # Find index of data instances in each cluster
+            index = np.asarray(np.where(cindex==i))
+            index = index.reshape(-1)
+
+            # If this cluster is empty, use the most frequent class as prediction
+            if self.classes[i] == -1:
+                u, indices = np.unique(testl[index], return_inverse=True)
+                prediction[index] = u[np.argmax(np.bincount(indices))]
+            else:
+                prediction[index] = self.classes[i]
+        
+        return prediction
+
