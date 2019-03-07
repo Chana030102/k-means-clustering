@@ -141,12 +141,13 @@ class Cluster:
             index = np.asarray(np.where(cindex==i))
             index = index.reshape(-1)
 
-            # If this cluster is empty, use the most frequent class as prediction
-            if self.classes[i] == -1:
-                u, indices = np.unique(testl[index], return_inverse=True)
-                prediction[index] = u[np.argmax(np.bincount(indices))]
-            else:
-                prediction[index] = self.classes[i]
+            if index.size != 0:
+                # If this cluster is empty, use the most frequent class as prediction
+                if self.classes[i] == -1:
+                    u, indices = np.unique(testl[index], return_inverse=True)
+                    prediction[index] = u[np.argmax(np.bincount(indices))]
+                else:
+                    prediction[index] = self.classes[i]
         
         return prediction
 
