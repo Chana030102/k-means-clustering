@@ -22,19 +22,19 @@ class Cluster:
 
         self.amse = 0            # average mean square error
         self.mse  = np.zeros(K)  # mean square error
-        self.mss  = np.zeros(K)  # mean square separation
+        self.mss  = 0            # mean square separation
         self.me   = np.zeros(K)  # mean entropy
 
     # Calculate distance between data and cluster centers
     # return_raw:
     #   False --> return index of centers that each instance belongs to
     #   True  --> return distances between each instance and each center
-    def cluster_group(self,data,return_raw=False):
+    def cluster_group(self,centers,data,return_raw=False):
         distance = np.zeros((len(self.centers),len(data)))
 
          # Calculate distance from center to each data instance
-        for i in range(len(self.centers)):
-            d = data - self.centers[i]
+        for i in range(len(centers)):
+            d = data - centers[i]
             d = np.square(d)
             d = np.sum(d,axis=1) 
             distance[i] = d
@@ -50,27 +50,31 @@ class Cluster:
     # Fit cluster centers to training data
     # Done calculating when centers don't move  
     def fit(self, data, label):
-        new_center  = self.centers
+        new_center  = self.centers.copy()
         prev_center = np.zeros(self.centers.shape)
-        
+        count = 0
+
         while(not np.array_equiv(prev_center,new_center)):
-            prev_center = new_center
-            cindex = self.cluster_group(data)
+            print("changing centers {}".format(count))
+            prev_center = new_center.copy()
+            cindex = self.cluster_group(prev_center, data)
 
             # Calculate new centers
             for i in range(len(self.centers)):
                 index = np.asarray(np.where(cindex==i))
                 index = index.reshape(-1)
 
-                if index.size == 0: 
-                    # randomly choose new centroid when cluster is empty
-                    cdata = np.random.randint(0,MAX+1,size=self.centers.shape[1])
-                else:
-                    # calculate new position of cluster centroid
+                # calculate new position of cluster centroid
+                # empty cluster centers stay the same                
+                if index.size != 0:
                     cdata = data[index]
                     cdata = np.sum(cdata,axis=0)/len(index)
+                    new_center[i] = cdata
 
-                new_center[i] = cdata
+            count += 1
+            if(np.array_equiv(prev_center,new_center)):
+                print("Centers are the same")
+
         self.centers = new_center
 
         # Classify the clusters
@@ -97,7 +101,7 @@ class Cluster:
     # average distance between data and center
     # Provide index of nonempty cluster
     def calc_mse(self, data, cindex):
-        d = data - self.centers[i]
+        d = data - self.centers[cindex]
         d = np.square(d)
         self.mse[cindex] = np.sum(d)/len(data)
         
@@ -110,7 +114,7 @@ class Cluster:
             d = self.centers[i+1:-1] - self.centers[i]
             d = np.square(d)
             dsum += np.sum(d)  
-        self.amse = dsum/len(index)
+        self.mss = dsum/len(index)
 
     # Calculate mean entropy
-    def mean_entropy(self,index):
+    #def mean_entropy(self,index):
