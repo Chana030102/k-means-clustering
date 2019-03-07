@@ -20,15 +20,16 @@ class Cluster:
         self.classes = np.zeros(K)
         self.nonzero = []
 
-        self.amse = 0     # average mean square error
-        self.mss  = 0     # mean square separation
-        self.me   = 0     # mean entropy
+        self.amse = 0            # average mean square error
+        self.mse  = np.zeros(K)  # mean square error
+        self.mss  = np.zeros(K)  # mean square separation
+        self.me   = np.zeros(K)  # mean entropy
 
     # Calculate distance between data and cluster centers
     # return_raw:
     #   False --> return index of centers that each instance belongs to
     #   True  --> return distances between each instance and each center
-    def distance(self,data,return_raw=False):
+    def cluster_group(self,data,return_raw=False):
         distance = np.zeros((len(self.centers),len(data)))
 
          # Calculate distance from center to each data instance
@@ -54,7 +55,7 @@ class Cluster:
         
         while(not np.array_equiv(prev_center,new_center)):
             prev_center = new_center
-            cindex = self.distance(data)
+            cindex = self.cluster_group(data)
 
             # Calculate new centers
             for i in range(len(self.centers)):
@@ -82,17 +83,34 @@ class Cluster:
 
             if index.size == 0:
                 self.classes[i] = -1 # empty cluster
+                self.mse[i]     = -1
             else:
-                self.nonzero.append(i)
                 u, indices = np.unique(label[index], return_inverse=True)
                 self.classes[i] = u[np.argmax(np.bincount(indices))]
-
-    def calc_mss(self):
+                self.nonzero.append(i)
+                self.calc_mse(data[index],i)
         
+        self.amse = np.sum(self.mse)/((len(self.centers)*(len(self.centers)-1)/2))
+        self.calc_mss(self.nonzero)
 
+    # Calculate the mean square error of one center
+    # average distance between data and center
+    # Provide index of nonempty cluster
+    def calc_mse(self, data, cindex):
+        d = data - self.centers[i]
+        d = np.square(d)
+        self.mse[cindex] = np.sum(d)/len(data)
+        
+    # Calculate mean square separation
+    # Provide list of index for nonempty clusters
+    # (sum of distance of distinct pairs of centroids)/(K(K-1)/2)
+    def calc_mss(self,index):
+        dsum = 0
+        for i in range(len(index)-1):
+            d = self.centers[i+1:-1] - self.centers[i]
+            d = np.square(d)
+            dsum += np.sum(d)  
+        self.amse = dsum/len(index)
 
-
-            
-            
-
-                
+    # Calculate mean entropy
+    def mean_entropy(self,index):
