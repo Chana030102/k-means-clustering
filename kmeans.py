@@ -118,14 +118,8 @@ class Cluster:
             dsum += np.sum(d)  
         self.mss = dsum/len(index)
 
-    # Calculate mean entropy
+    # Calculate entropy of provided cluster labels
     def entropy(self, label):
-        u, indices = np.unique(label,return_inverse=True)
+        _, indices = np.unique(label,return_inverse=True)
         count = np.bincount(indices)
-        total = 0
-
-        for i in count:
-            p = count/len(label)
-            total += p*np.log2(p)
-        
-        return -1*total
+        return np.sum(count*np.log2(count))
