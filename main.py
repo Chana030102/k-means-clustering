@@ -11,6 +11,7 @@
 #
 # The above is done with a 10 cluster and 30 cluster system
 
+import os
 import numpy as np
 import sklearn.metrics as metric
 from PIL import Image
@@ -21,7 +22,7 @@ TEST_FILE  = "../optdigits/optdigits.test"
 DELIMITER  = ","
 SCALE      = 10
 
-# confusion matrix files
+# confusion matrix file names
 cluster10 = "./k=10/acc={0:.2%} cmatrix k=10.csv"
 cluster30 = "./k=30/acc={0:.2%} cmatrix k=30.csv"
 
@@ -55,6 +56,17 @@ prediction = c[index].classify(testd,testl)
 accuracy10 = metric.accuracy_score(testl,prediction)
 s = "{0:.2%}".format(accuracy10)
 
+# fill confusion matrix
+for i in range(len(testl)):
+    cmatrix[int(testl[i]),prediction[i]]+=1
+
+# Make directory if it doesn't exist
+try:
+    np.savetxt(cluster10.format(accuracy10),cmatrix,delimiter=DELIMITER)
+except:
+    os.mkdir("k=10")
+    np.savetxt(cluster10.format(accuracy10),cmatrix,delimiter=DELIMITER)
+    
 # Create grayscale bmp of cluster centers
 print("Creating bmp images for K=10")
 for i in range(len(c[index].centers)):
@@ -65,12 +77,6 @@ for i in range(len(c[index].centers)):
         im = im.resize([im.width*SCALE,im.height*SCALE])
         im.convert('RGB').save("./k=10/acc={} center {} class {}.bmp".format(s,str(i),str(c[index].classes[i])))
 
-
-# fill confusion matrix
-for i in range(len(testl)):
-    cmatrix[int(testl[i]),prediction[i]]+=1
-
-np.savetxt(cluster10.format(accuracy10),cmatrix,delimiter=DELIMITER)
 print("Cluster System K = 10")
 print("Accuracy = {0:.2%}".format(accuracy10))
 print("Average Mean Square Error = {}".format(c[index].amse))
@@ -98,6 +104,17 @@ prediction = c[index].classify(testd,testl)
 accuracy30 = metric.accuracy_score(testl,prediction)
 s = "{0:.2%}".format(accuracy30)
 
+# fill confusion matrix
+for i in range(len(testl)):
+    cmatrix[int(testl[i]),prediction[i]]+=1
+
+# Make directory if it doesn't exist
+try:
+    np.savetxt(cluster30.format(accuracy30),cmatrix,delimiter=DELIMITER)
+except:
+    os.mkdir("k=30")
+    np.savetxt(cluster30.format(accuracy30),cmatrix,delimiter=DELIMITER)
+
 # Create grayscale bmp of cluster centers
 print("Creating bmp images for K=30")
 for i in range(len(c[index].centers)):
@@ -107,12 +124,6 @@ for i in range(len(c[index].centers)):
         im = Image.fromarray(d/16*255)
         im = im.resize([im.width*SCALE,im.height*SCALE])
         im.convert('RGB').save("./k=30/acc={} center {} class {}.bmp".format(s,str(i),str(c[index].classes[i])))
-
-# fill confusion matrix
-for i in range(len(testl)):
-    cmatrix[int(testl[i]),prediction[i]]+=1
-
-np.savetxt(cluster30.format(accuracy30),cmatrix,delimiter=DELIMITER)
 
 print("Cluster System K = 30")
 print("Accuracy = {0:.2%}".format(accuracy30))
