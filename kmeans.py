@@ -125,7 +125,8 @@ class Cluster:
     def entropy(self, label):
         _, indices = np.unique(label,return_inverse=True)
         count = np.bincount(indices)
-        return np.sum(count*np.log2(count))
+        count = np.divide(count,len(label))
+        return -1*np.sum(count*np.log2(count))
 
     # Classify the provided test data
     def classify(self, testd, testl):

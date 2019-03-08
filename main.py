@@ -19,7 +19,7 @@ import kmeans as k
 TRAIN_FILE = "../optdigits/optdigits.train"
 TEST_FILE  = "../optdigits/optdigits.test"
 DELIMITER  = ","
-SCALE      = 200
+SCALE      = 10
 
 # confusion matrix files
 cluster10 = "./k=10/acc={0:.2%} cmatrix k=10.csv"
@@ -47,7 +47,7 @@ for i in c:
     amse.append(i.amse)
 
 # identify cluster system with lowest asme
-index = np.argmax(amse)
+index = np.argmin(amse)
 print("Using {}".format(index))
 
 # classify test data
@@ -71,8 +71,13 @@ for i in range(len(testl)):
     cmatrix[int(testl[i]),prediction[i]]+=1
 
 np.savetxt(cluster10.format(accuracy10),cmatrix,delimiter=DELIMITER)
+print("Cluster System K = 10")
+print("Accuracy = {0:.2%}".format(accuracy10))
+print("Average Mean Square Error = {}".format(c[index].amse))
+print("Mean Square Separation = {}".format(c[index].mss))
+print("Mean Entropy = {}".format(c[index].me))
 
-#===== K means clustering -- 30 clusters ====
+##===== K means clustering -- 30 clusters ====
 # initialize confusion matrix with zeros
 print("K = 30")
 cmatrix = np.zeros((len(np.unique(testl)),len(np.unique(testl))))
@@ -85,7 +90,7 @@ for i in c:
     amse.append(i.amse)
 
 # identify cluster system with lowest asme
-index = np.argmax(amse)
+index = np.argmin(amse)
 print("Using {}".format(index))
 
 # classify test data
@@ -105,9 +110,12 @@ for i in range(len(c[index].centers)):
 
 # fill confusion matrix
 for i in range(len(testl)):
-    cmatrix[int(testl[i]),prediction[i]]
+    cmatrix[int(testl[i]),prediction[i]]+=1
 
 np.savetxt(cluster30.format(accuracy30),cmatrix,delimiter=DELIMITER)
 
-print("10 cluster system - accuracy = {0:.2%}".format(accuracy10))
-print("30 cluster system - accuracy = {0:.2%}".format(accuracy30))
+print("Cluster System K = 30")
+print("Accuracy = {0:.2%}".format(accuracy30))
+print("Average Mean Square Error = {}".format(c[index].amse))
+print("Mean Square Separation = {}".format(c[index].mss))
+print("Mean Entropy = {}".format(c[index].me))
